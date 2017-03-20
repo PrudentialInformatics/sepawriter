@@ -36,6 +36,10 @@ namespace Perrich.SepaWriter
 
         public string InitiatingPartyName { get; set; }
 
+        public string InitiatingPartyOrganisationIdentificationOtherId { get; set; }
+
+        public string InitiatingPartyOrganisationIdentificationOtherIssuer { get; set; }
+
         /// <summary>
         ///     Local service instrument code
         /// </summary>
@@ -166,9 +170,13 @@ namespace Perrich.SepaWriter
             {
                 throw new SepaRuleException("The message identification is mandatory.");
             }
-            if (string.IsNullOrEmpty(InitiatingPartyName))
+            if (string.IsNullOrEmpty(InitiatingPartyOrganisationIdentificationOtherId))
             {
-                throw new SepaRuleException("The initial party name is mandatory.");
+                throw new SepaRuleException("The initial party organisation identification other id is mandatory.");
+            }
+            if (string.IsNullOrEmpty(InitiatingPartyOrganisationIdentificationOtherId))
+            {
+                throw new SepaRuleException("The initial party organisation identification other issuer is mandatory.");
             }
         }
 

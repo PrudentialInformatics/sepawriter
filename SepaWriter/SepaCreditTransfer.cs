@@ -85,47 +85,64 @@ namespace Perrich.SepaWriter
             grpHdr.NewElement("CreDtTm", StringUtils.FormatDateTime(CreationDate));
             grpHdr.NewElement("NbOfTxs", numberOfTransactions);
             grpHdr.NewElement("CtrlSum", StringUtils.FormatAmount(headerControlSum));
-            grpHdr.NewElement("InitgPty").NewElement("Nm", InitiatingPartyName);
-			
-			if (InitiatingPartyId != null) {
-				XmlUtils.GetFirstElement(grpHdr, "InitgPty").
-					NewElement("Id").NewElement("OrgId").
-					NewElement("Othr").NewElement("Id", InitiatingPartyId);
-			}
+            grpHdr.NewElement("InitgPty");
+
+            if (InitiatingPartyName != null)
+            {
+                XmlUtils.GetFirstElement(grpHdr, "InitgPty").
+                         NewElement("Nm", InitiatingPartyName);
+            }
+
+            if (InitiatingPartyOrganisationIdentificationOtherId != null ||
+                InitiatingPartyOrganisationIdentificationOtherIssuer != null)
+            {
+                var othr = XmlUtils.GetFirstElement(grpHdr, "InitgPty").
+                                    NewElement("Id").NewElement("OrgId").
+                                    NewElement("Othr");
+
+                if (InitiatingPartyOrganisationIdentificationOtherId != null)
+                    othr.NewElement("Id", InitiatingPartyOrganisationIdentificationOtherId);
+
+                if (InitiatingPartyOrganisationIdentificationOtherIssuer != null)
+                    othr.NewElement("Issr", InitiatingPartyOrganisationIdentificationOtherIssuer);
+            }
 
             // Part 2: Payment Information
             var pmtInf = XmlUtils.GetFirstElement(xml, "CstmrCdtTrfInitn").NewElement("PmtInf");
             pmtInf.NewElement("PmtInfId", PaymentInfoId ?? MessageIdentification);
 
             pmtInf.NewElement("PmtMtd", Constant.CreditTransfertPaymentMethod);
-            pmtInf.NewElement("NbOfTxs", numberOfTransactions);
+            //pmtInf.NewElement("BtchBookg", "false");
+            //pmtInf.NewElement("NbOfTxs", numberOfTransactions);
             pmtInf.NewElement("CtrlSum", StringUtils.FormatAmount(paymentControlSum));
             pmtInf.NewElement("PmtTpInf").NewElement("SvcLvl").NewElement("Cd", "SEPA");
             if (LocalInstrumentCode != null)
                 XmlUtils.GetFirstElement(pmtInf, "PmtTpInf").NewElement("LclInstr")
                         .NewElement("Cd", LocalInstrumentCode);
 
-			if (CategoryPurposeCode != null) {
-				 XmlUtils.GetFirstElement(pmtInf, "PmtTpInf").
-					 NewElement("CtgyPurp").
-					 NewElement("Cd", CategoryPurposeCode);
-			}
-			
-			pmtInf.NewElement("ReqdExctnDt", StringUtils.FormatDate(RequestedExecutionDate));
-            pmtInf.NewElement("Dbtr").NewElement("Nm", Debtor.Name);
-			if (InitiatingPartyId != null) {
-				XmlUtils.GetFirstElement(pmtInf, "Dbtr").
-					NewElement("Id").NewElement("OrgId").
-					NewElement("Othr").NewElement("Id", InitiatingPartyId);
-			}
+            if (CategoryPurposeCode != null) {
+                XmlUtils.GetFirstElement(pmtInf, "PmtTpInf").
+                    NewElement("CtgyPurp").
+                    NewElement("Cd", CategoryPurposeCode);
+            }
 
+            pmtInf.NewElement("ReqdExctnDt", StringUtils.FormatDate(RequestedExecutionDate));
+            pmtInf.NewElement("Dbtr");
+            if (Debtor.Name != null)
+            {
+                XmlUtils.GetFirstElement(pmtInf, "Dbtr").NewElement("Nm", Debtor.Name);
+            }
+            if (InitiatingPartyId != null) {
+                XmlUtils.GetFirstElement(pmtInf, "Dbtr").
+                    NewElement("Id").NewElement("OrgId").
+                    NewElement("Othr").NewElement("Id", InitiatingPartyId);
+            }
 
             var dbtrAcct = pmtInf.NewElement("DbtrAcct");
             dbtrAcct.NewElement("Id").NewElement("IBAN", Debtor.Iban);
-            dbtrAcct.NewElement("Ccy", DebtorAccountCurrency);
-
+            //dbtrAcct.NewElement("Ccy", DebtorAccountCurrency);
             pmtInf.NewElement("DbtrAgt").NewElement("FinInstnId").NewElement("BIC", Debtor.Bic);
-            pmtInf.NewElement("ChrgBr", "SLEV");
+            //pmtInf.NewElement("ChrgBr", "SLEV");
 
             // Part 3: Credit Transfer Transaction Information
             foreach (var transfer in transactions)
@@ -156,13 +173,13 @@ namespace Perrich.SepaWriter
 
             cdtTrfTxInf.NewElement("CdtrAcct").NewElement("Id").NewElement("IBAN", transfer.Creditor.Iban);
 
-			if (!string.IsNullOrEmpty(transfer.Purpose)) {
-				cdtTrfTxInf.NewElement("Purp").NewElement("Cd", transfer.Purpose);
-			}
+            if (!string.IsNullOrEmpty(transfer.Purpose)) {
+                cdtTrfTxInf.NewElement("Purp").NewElement("Cd", transfer.Purpose);
+            }
 
-			if (!string.IsNullOrEmpty(transfer.RemittanceInformation)) {
-				cdtTrfTxInf.NewElement("RmtInf").NewElement("Ustrd", transfer.RemittanceInformation);
-			}
+            if (!string.IsNullOrEmpty(transfer.RemittanceInformation)) {
+                cdtTrfTxInf.NewElement("RmtInf").NewElement("Ustrd", transfer.RemittanceInformation);
+            }
         }
         protected override bool CheckSchema(SepaSchema aSchema)
         {
