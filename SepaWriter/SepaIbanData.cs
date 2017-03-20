@@ -75,7 +75,7 @@ namespace Perrich.SepaWriter
         /// <returns></returns>
         public bool IsValid
         {
-            get { return (!string.IsNullOrEmpty(bic) || withoutBic) && !string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(iban); }
+            get { return (!string.IsNullOrEmpty(bic) || withoutBic)  && !string.IsNullOrEmpty(iban); } // && !string.IsNullOrEmpty(name)
         }
 
         /// <summary>
