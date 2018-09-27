@@ -13,6 +13,8 @@ namespace Perrich.SepaWriter.Utils
     /// </summary>
     public class XmlValidator
     {
+        private readonly List<string> Errors = new List<string>();
+
         private static readonly Dictionary<SepaSchema, XmlValidator> validators = new Dictionary<SepaSchema, XmlValidator>();
 
         /// <summary>
@@ -75,7 +77,8 @@ namespace Perrich.SepaWriter.Utils
         /// <returns></returns>
         public bool Validate(string xml)
         {
-            if (string.IsNullOrEmpty(xml)) return false;
+            if (string.IsNullOrEmpty(xml))
+                return false;
 
             result = true;
             try
@@ -93,7 +96,8 @@ namespace Perrich.SepaWriter.Utils
             }
             catch (Exception ex)
             {
-                //Log.Error("Validation issue due to an exception", ex);
+                this.Errors.Add($"Validation issue due to an exception. (Exception: '{ ex.Message }')");
+
                 result = false;
             }
 
@@ -102,12 +106,13 @@ namespace Perrich.SepaWriter.Utils
 
         private void ValidationEventHandler(object sender, ValidationEventArgs e)
         {
-            if (e.Severity != XmlSeverityType.Error && e.Severity != XmlSeverityType.Warning) return;
+            if (e.Severity != XmlSeverityType.Error && e.Severity != XmlSeverityType.Warning)
+                return;
 
             result = false;
-            //Log.ErrorFormat("Validation issue at line: {0}, position: {1} \"{2}\"", 
-            //    e.Exception.LineNumber, e.Exception.LinePosition, 
-            //    e.Exception.Message);
+
+            this.Errors.Add($"Validation issue at line: { e.Exception.LineNumber }, position: { e.Exception.LinePosition } \"{ e.Exception.Message }\"");
+
         }
     }
 }

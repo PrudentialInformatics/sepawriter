@@ -11,13 +11,16 @@ namespace Perrich.SepaWriter
     /// </summary>
     public abstract class SepaTransfer<T> where T : SepaTransferTransaction
     {
+        public bool ShowHeaderControlSum { get; set; } = true;
         protected decimal headerControlSum;
+        public bool ShowPaymentControlSum { get; set; } = true;
         protected decimal paymentControlSum;
         protected SepaIbanData SepaIban;
         protected readonly List<T> transactions = new List<T>();
 
         protected SepaSchema schema;
 
+        public bool ShowNumberOfTransactions { get; set; }
         /// <summary>
         ///     Number of payment transactions.
         /// </summary>
